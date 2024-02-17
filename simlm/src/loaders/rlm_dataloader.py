@@ -31,8 +31,12 @@ class ReplaceLMDataloader:
     def __init__(self, args: Arguments, tokenizer: PreTrainedTokenizerFast):
         self.args = args
         self.tokenizer = tokenizer
-        data_files = args.train_file.strip().split(',')
-        self.corpus: Dataset = load_dataset('json', data_files=data_files)['train']
+        if "jsonl" in args.train_file:
+            data_files = args.train_file.strip().split(',')
+            self.corpus: Dataset = load_dataset('json', data_files=data_files)['train']
+        # allow loading from huggingface dataset
+        else:
+            self.corpus: Dataset = load_dataset(args.train_file)['train']
         self.train_dataset, self.eval_dataset = split_dataset(
             self.corpus,
             num_eval_examples=args.rlm_num_eval_samples,
